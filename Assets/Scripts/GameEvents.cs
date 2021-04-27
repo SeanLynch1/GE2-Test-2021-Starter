@@ -26,11 +26,31 @@ public class GameEvents : MonoBehaviour
     public delegate bool BoolDel();
     public event BoolDel onLookForPickUp;
     public event BoolDel onBallPickUp;
+    public event BoolDel onStopMoving; 
 
     public event Action onLookForOwner;
     public event Action onFetchBall;
     public event Action onDropBall;
+    public event Action onSit;
 
+    public bool StopMoving()
+    {
+        if(onStopMoving != null)
+        {
+           return onStopMoving();
+        }
+        else
+        {
+            return false;
+        }
+    }
+    public void Sit()
+    {
+        if(onSit != null)
+        {
+            onSit();
+        }
+    }
     public void DropBall()
     {
         if(onDropBall != null)

@@ -6,25 +6,21 @@ public class SitState : IDogState
 {
     public IDogState DoState(DogBaseStateController dogBaseStateController)
     {
-        if(!CanSeePickUp())
+        SitBoy();
+
+        if (!Stop())
         {
-            MoveTowardsPlayer();
-            return dogBaseStateController.sitState;
+            return dogBaseStateController.moveState;
         }
-        else
-        {
-            return dogBaseStateController.fetchState;
-        }
+        else return dogBaseStateController.sitState;
     }
 
-
-    private void MoveTowardsPlayer()
+    public void SitBoy()
     {
-        GameEvents.Instance.LookForOwner();
+        GameEvents.Instance.Sit();
     }
-
-    private bool CanSeePickUp()
+    public bool Stop()
     {
-       return GameEvents.Instance.CanSeePickUp();
+       return GameEvents.Instance.StopMoving();
     }
 }

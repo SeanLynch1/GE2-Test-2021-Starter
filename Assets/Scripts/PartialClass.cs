@@ -11,6 +11,8 @@ public partial class DogBaseStateController : MonoBehaviour
         GameEvents.Instance.onFetchBall += FetchBall;
         GameEvents.Instance.onBallPickUp += PickUpBall;
         GameEvents.Instance.onDropBall += DropBall;
+        GameEvents.Instance.onSit += Sit;
+        GameEvents.Instance.onStopMoving += StopMoving;
     }
 
     private void OnDisable()
@@ -20,20 +22,28 @@ public partial class DogBaseStateController : MonoBehaviour
         GameEvents.Instance.onFetchBall -= FetchBall;
         GameEvents.Instance.onBallPickUp -= PickUpBall;
         GameEvents.Instance.onDropBall -= DropBall;
+        GameEvents.Instance.onSit -= Sit;
+        GameEvents.Instance.onStopMoving -= StopMoving;
     }
 
+    Vector3 force = Vector3.zero;
+    Vector3 acceleration = Vector3.zero;
 
     public void LookForOwner()
     {
         distance = Vector3.Distance(this.transform.position, playerTarget.position);
-        if(distance >= 10)
+        transform.LookAt(new Vector3(playerTarget.position.x, 0, playerTarget.position.z));
+        
+        WagTail(distance / 3);
+        if (distance >= 10)
         {
-            transform.position = Vector3.MoveTowards(this.transform.position, playerTarget.position, Time.deltaTime * movementSpeed);
-            transform.LookAt(playerTarget.position);
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(playerTarget.transform.position.x, transform.position.y, playerTarget.transform.position.z), distance * Time.deltaTime);
+         
         }
         else //IF DOG HAS ARRIVED AT PLAYER
         {
             DropBall();
+            Bark();
         }
     }
 
@@ -48,6 +58,7 @@ public partial class DogBaseStateController : MonoBehaviour
             return false;
         }
     }
+
     private GameObject ball;
     public bool PickUpBall()
     {
@@ -57,6 +68,7 @@ public partial class DogBaseStateController : MonoBehaviour
         float dist = Vector3.Distance(ballAttachPos.transform.position, ballPos);
         if (dist < pickUpDistance)
         {
+            ball.transform.position = ballAttachPos.transform.position;
             ball.transform.parent = ballAttachPos.transform;
             rb.useGravity = false;
             rb.constraints = RigidbodyConstraints.FreezeAll;
@@ -73,21 +85,17 @@ public partial class DogBaseStateController : MonoBehaviour
     {
         Vector3 ballPos = BallController.ballList[BallController.ballList.Count - 1].transform.position;
         float dist = Vector3.Distance(ballAttachPos.transform.position, ballPos);
-
-        Vector3 look = ballPos - transform.position;
-        look.y = 0;
-
-        Quaternion q = Quaternion.LookRotation(look);
-        if (Quaternion.Angle(q, transform.rotation) <= 180)
-            BallController.ballList[BallController.ballList.Count - 1].transform.rotation = q;
-
+        WagTail(dist / 3);
         DropBall();
+            transform.LookAt(new Vector3(ballPos.x, 0, ballPos.z));
+
         if (dist > pickUpDistance)
         {
-            transform.position = Vector3.MoveTowards(this.transform.position, ballPos, movementSpeed * Time.deltaTime);
-            transform.rotation = Quaternion.Slerp(transform.rotation, BallController.ballList[BallController.ballList.Count - 1].transform.rotation, Time.deltaTime * 2.0f);
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(ballPos.x,transform.position.y,ballPos.z), dist * Time.deltaTime);
+            
         }
     }
+  
     public void DropBall()
     {
         if (currentBall.Count == 1)
@@ -111,13 +119,59 @@ public partial class DogBaseStateController : MonoBehaviour
             }
         }
     }
+    public void Bark()
+    {
+        time -= Time.deltaTime;
+        if(time <= 0)
+        {
+            int n = Random.Range(0, barkSounds.Count);
+            barkSounds[n].Play();
+            time = Random.Range(1.5f,5f);
+        }
+    }
+    private bool toggle = false;
 
+    public bool StopMoving()
+    {
+        if(Input.GetKeyDown(KeyCode.Q))
+        {
+            toggle = !toggle;
+            Debug.Log("Sit!");
+        }
+        return toggle;
+    }
+    public void Sit()
+    {
+        transform.LookAt(playerTarget);
+    }
+
+    public void WagTail(float distSpeed)
+    {
+        startTime += Time.deltaTime;
+        tail.transform.rotation = Quaternion.Lerp(start, end, (Mathf.Sin(startTime * distSpeed + Mathf.PI / 2) + 1.0f) / 2.0f );
+    }
+    Quaternion TailRotation(float angle)
+    {
+        var tailRotation = tail.transform.rotation;
+        var angleY = tailRotation.eulerAngles.y + angle;
+
+        if (angleY > 90)
+        {
+            angleY += 360;
+        }
+        else if (angleY < -90)
+        {
+            angleY -= 360;
+        }
+
+        tailRotation.eulerAngles = new Vector3(tailRotation.eulerAngles.x, angleY, tailRotation.eulerAngles.z);
+        return tailRotation;
+    }
     private void OnTriggerEnter(Collider other)
     {
         if(other.CompareTag("Ball"))
         {
             canSeePickUp = true;
-            Debug.Log("Ball Was Found");
         }
     }
 }

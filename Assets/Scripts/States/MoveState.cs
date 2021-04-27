@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FetchState : IDogState
+public class MoveState : IDogState
 {
     public IDogState DoState(DogBaseStateController dogBaseStateController)
     {
@@ -10,28 +10,27 @@ public class FetchState : IDogState
         {
             return dogBaseStateController.sitState;
         }
-        if (!PickUpBall())
+        if (!CanSeePickUp())
         {
-            FetchBall();
-            return dogBaseStateController.fetchState;
+            MoveTowardsPlayer();
+            return dogBaseStateController.moveState;
         }
         
         else
         {
-            return dogBaseStateController.moveState;
+            return dogBaseStateController.fetchState;
         }
     }
 
-    private void FetchBall()
+
+    private void MoveTowardsPlayer()
     {
-         GameEvents.Instance.FetchBall();
+        GameEvents.Instance.LookForOwner();
     }
 
-    private bool PickUpBall()
+    private bool CanSeePickUp()
     {
-        return GameEvents.Instance.PickUpBall();
-
-        
+       return GameEvents.Instance.CanSeePickUp();
     }
     public bool Stop()
     {

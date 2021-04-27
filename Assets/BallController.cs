@@ -25,4 +25,12 @@ public class BallController : MonoBehaviour
             newBall.GetComponent<Rigidbody>().AddForce(transform.forward * throwForce);
         }
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.CompareTag("Ball"))
+        {
+            //Destroy(other.gameObject);
+        }
+    }
 }
