@@ -26,6 +26,7 @@ public partial class DogBaseStateController : MonoBehaviour
     public Transform playerTarget;
     private GameObject ballAttachPos;
     private GameObject tail;
+    private GameObject ball;
     private List<GameObject> currentBall = new List<GameObject>();
 
     #endregion

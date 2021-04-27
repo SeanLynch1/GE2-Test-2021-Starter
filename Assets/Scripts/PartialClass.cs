@@ -59,7 +59,6 @@ public partial class DogBaseStateController : MonoBehaviour
         }
     }
 
-    private GameObject ball;
     public bool PickUpBall()
     {
         Vector3 ballPos = BallController.ballList[BallController.ballList.Count - 1].transform.position;
@@ -92,7 +91,6 @@ public partial class DogBaseStateController : MonoBehaviour
         if (dist > pickUpDistance)
         {
             transform.position = Vector3.MoveTowards(transform.position, new Vector3(ballPos.x,transform.position.y,ballPos.z), dist * Time.deltaTime);
-            
         }
     }
   
@@ -150,6 +148,7 @@ public partial class DogBaseStateController : MonoBehaviour
         startTime += Time.deltaTime;
         tail.transform.rotation = Quaternion.Lerp(start, end, (Mathf.Sin(startTime * distSpeed + Mathf.PI / 2) + 1.0f) / 2.0f );
     }
+    
     Quaternion TailRotation(float angle)
     {
         var tailRotation = tail.transform.rotation;
