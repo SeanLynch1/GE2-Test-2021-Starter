@@ -15,6 +15,7 @@ public class SitState : IDogState
         else return dogBaseStateController.sitState;
     }
 
+    //Stops dog from moving
     public void SitBoy()
     {
         GameEvents.Instance.Sit();
